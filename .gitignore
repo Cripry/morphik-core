@@ -49,3 +49,7 @@ ee/ee_tokens/*
 migrations
 ugly-onetime-code/*
 trees
+
+
+# Configs
+service_account_key.json

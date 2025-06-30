@@ -19,18 +19,21 @@ services:
       - "8000:8000"
     environment:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-secret-key-here}
-      - POSTGRES_URI=postgresql+asyncpg://morphik:morphik@postgres:5432/morphik
+      - POSTGRES_URI=postgresql+asyncpg://morphik:morphik@postgres:5432/morphik?sslmode=disable
       - PGPASSWORD=morphik
       - HOST=0.0.0.0
       - PORT=8000
       - LOG_LEVEL=DEBUG
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+      - AZURE_API_KEY=${AZURE_API_KEY}
     volumes:
       - ./storage:/app/storage
       - ./logs:/app/logs
       - ./morphik.toml:/app/morphik.toml
       - huggingface_cache:/root/.cache/huggingface
+      - ./config/service_account_key.json:/app/service_account_key.json:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -38,9 +41,9 @@ services:
         condition: service_healthy
       config-check:
         condition: service_completed_successfully
-      ollama:
-        condition: service_started
-        required: false
+      # ollama:
+      #   condition: service_started
+      #   required: false
     networks:
       - morphik-network
     env_file:
@@ -53,16 +56,19 @@ services:
     command: arq core.workers.ingestion_worker.WorkerSettings
     environment:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-secret-key-here}
-      - POSTGRES_URI=postgresql+asyncpg://morphik:morphik@postgres:5432/morphik
+      - POSTGRES_URI=postgresql+asyncpg://morphik:morphik@postgres:5432/morphik?sslmode=disable
       - PGPASSWORD=morphik
       - LOG_LEVEL=DEBUG
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+      - AZURE_API_KEY=${AZURE_API_KEY}
     volumes:
       - ./storage:/app/storage
       - ./logs:/app/logs
       - ./morphik.toml:/app/morphik.toml
       - huggingface_cache:/root/.cache/huggingface
+      - ./config/service_account_key.json:/app/service_account_key.json:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -70,9 +76,9 @@ services:
         condition: service_healthy
       config-check:
         condition: service_completed_successfully
-      ollama:
-        condition: service_started
-        required: false
+      # ollama:
+      #   condition: service_started
+      #   required: false
     networks:
       - morphik-network
     env_file:
@@ -116,18 +122,18 @@ services:
     networks:
       - morphik-network
 
-  ollama:
-    image: ollama/ollama:latest
-    profiles:
-      - ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-      - ./ollama-entrypoint.sh:/ollama-entrypoint.sh
-    networks:
-      - morphik-network
-    entrypoint: ["/ollama-entrypoint.sh"]
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   profiles:
+  #     - ollama
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama_data:/root/.ollama
+  #     - ./ollama-entrypoint.sh:/ollama-entrypoint.sh
+  #   networks:
+  #     - morphik-network
+  #   entrypoint: ["/ollama-entrypoint.sh"]
 
 networks:
   morphik-network:
@@ -135,7 +141,7 @@ networks:
 
 volumes:
   postgres_data:
-  ollama_data:
+  # ollama_data:
   huggingface_cache:
   redis_data:
  
