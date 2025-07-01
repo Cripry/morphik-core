@@ -36,7 +36,8 @@ COPY pyproject.toml uv.lock ./
 # This also creates the /app/.venv directory
 # Cache buster: 1 - verbose flag added
 RUN --mount=type=cache,target=${UV_CACHE_DIR} \
-    uv sync --verbose --locked --no-install-project
+    UV_HTTP_TIMEOUT=90 uv sync --verbose --locked --no-install-project
+
 
 # Copy the rest of the application code
 # Assuming start_server.py is at the root or handled by pyproject.toml structure.
